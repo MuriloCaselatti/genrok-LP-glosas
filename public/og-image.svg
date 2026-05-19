@@ -1,0 +1,73 @@
+<svg width="1200" height="630" viewBox="0 0 1200 630" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#0A2540;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#0D3461;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+
+  <!-- Background -->
+  <rect width="1200" height="630" fill="url(#bg)" />
+
+  <!-- Decorative circles -->
+  <circle cx="1100" cy="80" r="180" fill="#0D3461" opacity="0.5" />
+  <circle cx="100" cy="580" r="120" fill="#0D3461" opacity="0.4" />
+
+  <!-- Badge: GENROK | IA Anti-Glosas -->
+  <rect x="80" y="72" width="260" height="40" rx="20" fill="#00B896" />
+  <text x="210" y="98" font-family="Arial, sans-serif" font-size="16" font-weight="600"
+        fill="white" text-anchor="middle" dominant-baseline="middle">
+    GENROK  |  IA Anti-Glosas
+  </text>
+
+  <!-- Main headline -->
+  <text x="80" y="210" font-family="Arial Black, sans-serif" font-size="54"
+        font-weight="800" fill="white" letter-spacing="-1">
+    Sua Clínica Perde Até
+  </text>
+  <text x="80" y="285" font-family="Arial Black, sans-serif" font-size="54"
+        font-weight="800" fill="#00B896" letter-spacing="-1">
+    17% do Faturamento
+  </text>
+  <text x="80" y="358" font-family="Arial Black, sans-serif" font-size="54"
+        font-weight="800" fill="white" letter-spacing="-1">
+    em Glosas.
+  </text>
+
+  <!-- Subtext -->
+  <text x="80" y="430" font-family="Arial, sans-serif" font-size="26"
+        fill="#8C9BAB" font-weight="400">
+    Descubra o número real. Gratuito. 2 minutos.
+  </text>
+
+  <!-- Divider -->
+  <rect x="80" y="480" width="80" height="4" rx="2" fill="#00B896" />
+
+  <!-- Stats row -->
+  <text x="80" y="540" font-family="Arial Black, sans-serif" font-size="18"
+        fill="white" font-weight="700">
+    80% revertível
+  </text>
+  <text x="80" y="568" font-family="Arial, sans-serif" font-size="15"
+        fill="#8C9BAB">
+    Fonte: ANS / Anahp 2025
+  </text>
+
+  <text x="400" y="540" font-family="Arial Black, sans-serif" font-size="18"
+        fill="white" font-weight="700">
+    R$ 5,8 bi em perdas/ano
+  </text>
+  <text x="400" y="568" font-family="Arial, sans-serif" font-size="15"
+        fill="#8C9BAB">
+    Fonte: Anahp 2024
+  </text>
+
+  <text x="720" y="540" font-family="Arial Black, sans-serif" font-size="18"
+        fill="white" font-weight="700">
+    Diagnóstico gratuito
+  </text>
+  <text x="720" y="568" font-family="Arial, sans-serif" font-size="15"
+        fill="#8C9BAB">
+    Resultado via WhatsApp
+  </text>
+</svg>

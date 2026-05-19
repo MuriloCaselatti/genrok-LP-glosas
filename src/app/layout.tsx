@@ -17,10 +17,45 @@ const dmSans = DM_Sans({
   display: "swap",
 });
 
+const SITE_URL =
+  process.env.NEXT_PUBLIC_SITE_URL ?? "https://diagnostico.genrok.com.br";
+
 export const metadata: Metadata = {
   title: "Calculadora de Glosas Médicas | Genrok IA Anti-Glosas",
   description:
-    "Descubra em 2 minutos quanto sua clínica perde em glosas médicas por mês. Calculadora gratuita baseada em dados ANS/Anahp 2025.",
+    "Descubra em 2 minutos quanto sua clínica perde em glosas por mês. Diagnóstico gratuito baseado em dados ANS/Anahp 2025. Recupere até 80% das perdas.",
+  keywords: [
+    "glosas médicas",
+    "calculadora glosas",
+    "anti-glosas",
+    "IA saúde",
+    "auditoria médica",
+  ],
+  authors: [{ name: "Genrok AI" }],
+  robots: "index, follow",
+  openGraph: {
+    type: "website",
+    locale: "pt_BR",
+    url: SITE_URL,
+    siteName: "Genrok Anti-Glosas",
+    title: "Sua Clínica Perde Até 17% do Faturamento em Glosas. Descubra Quanto.",
+    description:
+      "Calculadora gratuita de perdas por glosas médicas. 2 minutos. Diagnóstico personalizado via WhatsApp.",
+    images: [
+      {
+        url: `${SITE_URL}/og-image.jpg`,
+        width: 1200,
+        height: 630,
+        alt: "Genrok — Calculadora de Glosas Médicas",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Calculadora de Glosas Médicas | Genrok",
+    description: "Descubra em 2 minutos quanto sua clínica perde em glosas.",
+    images: [`${SITE_URL}/og-image.jpg`],
+  },
 };
 
 const META_PIXEL_ID = process.env.NEXT_PUBLIC_META_PIXEL_ID;
@@ -33,10 +68,12 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="pt-BR">
-      <body className={`${sora.variable} ${dmSans.variable} font-body antialiased`}>
+      <body
+        className={`${sora.variable} ${dmSans.variable} font-body antialiased`}
+      >
         {children}
 
-        {/* Google Analytics 4 */}
+        {/* Google Analytics 4 — afterInteractive, não bloqueia renderização */}
         {GA4_ID && (
           <>
             <Script
@@ -58,7 +95,7 @@ export default function RootLayout({
           </>
         )}
 
-        {/* Meta Pixel — afterInteractive para não bloquear renderização */}
+        {/* Meta Pixel — afterInteractive, não bloqueia renderização */}
         {META_PIXEL_ID && (
           <Script
             id="meta-pixel"

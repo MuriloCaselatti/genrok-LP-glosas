@@ -1,0 +1,3 @@
+User-agent: *
+Allow: /
+Sitemap: https://diagnostico.genrok.com.br/sitemap.xml
