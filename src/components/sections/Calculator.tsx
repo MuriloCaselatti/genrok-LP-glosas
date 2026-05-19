@@ -1,9 +1,12 @@
 'use client'
 
-import { useCallback } from 'react'
+import { useCallback, useEffect, useRef } from 'react'
 import { useCalculator } from '@/hooks/useCalculator'
 import ProgressBar from '@/components/ui/ProgressBar'
 import RadioCard from '@/components/ui/RadioCard'
+import Bridge from '@/components/sections/Bridge'
+import { buildWhatsAppUrl } from '@/lib/whatsapp'
+import { PixelEvents, GA4Events } from '@/lib/analytics'
 import type { CalculatorFormData } from '@/types/calculator'
 
 type StepOption = {
@@ -36,12 +39,12 @@ const STEPS: StepConfig[] = [
     question: 'Qual é a sua principal especialidade médica?',
     microcopy: 'Especialidades cirúrgicas têm as maiores taxas de glosa',
     options: [
-      { value: 'ortopedia',   label: 'Ortopedia / Traumatologia' },
-      { value: 'cirurgia',    label: 'Cirurgia Geral / Centro Cirúrgico' },
-      { value: 'cardiologia', label: 'Cardiologia' },
-      { value: 'oncologia',   label: 'Oncologia' },
-      { value: 'oftalmologia',label: 'Oftalmologia' },
-      { value: 'outra',       label: 'Outra especialidade' },
+      { value: 'ortopedia',    label: 'Ortopedia / Traumatologia' },
+      { value: 'cirurgia',     label: 'Cirurgia Geral / Centro Cirúrgico' },
+      { value: 'cardiologia',  label: 'Cardiologia' },
+      { value: 'oncologia',    label: 'Oncologia' },
+      { value: 'oftalmologia', label: 'Oftalmologia' },
+      { value: 'outra',        label: 'Outra especialidade' },
     ],
   },
   {
@@ -61,10 +64,10 @@ const STEPS: StepConfig[] = [
     question: 'Há quanto tempo não realiza uma auditoria formal de glosas?',
     microcopy: 'Esse dado é determinante — quanto mais tempo, maior a perda acumulada',
     options: [
-      { value: 'nunca',      label: 'Nunca realizei uma auditoria',  sublabel: 'Situação de risco máximo' },
-      { value: 'mais1ano',   label: 'Há mais de 1 ano',              sublabel: 'Glosas acumuladas sem recurso' },
-      { value: 'entre6e12',  label: 'Entre 6 e 12 meses',            sublabel: 'Auditoria desatualizada' },
-      { value: 'regular',    label: 'Realizo regularmente',           sublabel: 'Boa prática — mas perdas ainda ocorrem' },
+      { value: 'nunca',     label: 'Nunca realizei uma auditoria', sublabel: 'Situação de risco máximo' },
+      { value: 'mais1ano',  label: 'Há mais de 1 ano',             sublabel: 'Glosas acumuladas sem recurso' },
+      { value: 'entre6e12', label: 'Entre 6 e 12 meses',           sublabel: 'Auditoria desatualizada' },
+      { value: 'regular',   label: 'Realizo regularmente',          sublabel: 'Boa prática — mas perdas ainda ocorrem' },
     ],
   },
 ]
@@ -92,18 +95,48 @@ export default function Calculator() {
   const { state, updateField, nextStep, prevStep, executarCalculo, canAdvance } =
     useCalculator()
 
-  const { currentStep, formData, isCalculating, showBridge } = state
+  const { currentStep, formData, isCalculating, showBridge, result } = state
+
+  // Rastrear primeiro clique no step 1 (evento Lead)
+  const leadTracked = useRef(false)
+
+  // Disparar InitiateCheckout quando Bridge aparece
+  useEffect(() => {
+    if (showBridge) {
+      PixelEvents.initiateCheckout()
+    }
+  }, [showBridge])
+
+  const handleRadioChange = useCallback(
+    (field: keyof CalculatorFormData, val: string) => {
+      if (currentStep === 1 && !leadTracked.current) {
+        PixelEvents.lead()
+        GA4Events.formStart()
+        leadTracked.current = true
+      }
+      updateField(field, val)
+    },
+    [currentStep, updateField]
+  )
 
   const handleNext = useCallback(() => {
     if (currentStep < 4) {
       nextStep()
     } else {
+      GA4Events.formStepComplete(4)
       executarCalculo()
     }
   }, [currentStep, nextStep, executarCalculo])
 
-  // Bridge section placeholder — implementada na Etapa 4
-  if (showBridge) return null
+  // Após cálculo: renderiza Bridge no lugar da calculadora
+  if (showBridge && result) {
+    return (
+      <Bridge
+        result={result}
+        whatsappUrl={buildWhatsAppUrl(result)}
+      />
+    )
+  }
 
   const step = STEPS[currentStep - 1]
   const currentValue = formData[step.field]
@@ -150,7 +183,7 @@ export default function Calculator() {
                     label={opt.label}
                     sublabel={opt.sublabel}
                     selected={currentValue === opt.value}
-                    onChange={(val) => updateField(step.field, val)}
+                    onChange={(val) => handleRadioChange(step.field, val)}
                   />
                 ))}
               </div>

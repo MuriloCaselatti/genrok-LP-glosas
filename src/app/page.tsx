@@ -2,6 +2,8 @@ import Header from '@/components/layout/Header';
 import Hero from '@/components/sections/Hero';
 import AuthorityStats from '@/components/sections/AuthorityStats';
 import Calculator from '@/components/sections/Calculator';
+import FAQ from '@/components/sections/FAQ';
+import FinalCTA from '@/components/sections/FinalCTA';
 
 export default function Home() {
   return (
@@ -11,7 +13,9 @@ export default function Home() {
         <Hero />
         <AuthorityStats />
         <Calculator />
-        {/* Bridge + demais seções — Etapas 4 e 5 */}
+        {/* Bridge é renderizada dentro do Calculator após showBridge=true */}
+        <FAQ />
+        <FinalCTA />
       </main>
     </>
   );
