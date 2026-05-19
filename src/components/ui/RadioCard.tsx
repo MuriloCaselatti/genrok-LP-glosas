@@ -1,15 +1,15 @@
 interface RadioCardProps {
-  label: string;
-  description?: string;
-  value: string;
-  selected: boolean;
-  onChange: (value: string) => void;
+  value: string
+  label: string
+  sublabel?: string
+  selected: boolean
+  onChange: (value: string) => void
 }
 
 export default function RadioCard({
-  label,
-  description,
   value,
+  label,
+  sublabel,
   selected,
   onChange,
 }: RadioCardProps) {
@@ -20,23 +20,13 @@ export default function RadioCard({
       aria-checked={selected}
       onClick={() => onChange(value)}
       className={[
-        'w-full text-left px-5 py-4 rounded-xl border transition-all duration-150',
+        'w-full text-left px-5 py-4 rounded-lg border-2 transition-all duration-150 cursor-pointer',
         selected
-          ? 'border-teal bg-teal/5 shadow-[0_0_0_2px_#00B896]'
-          : 'border-[#E8EDF2] bg-white hover:border-teal/40 hover:bg-[#F4F7FA]',
+          ? 'border-teal bg-teal/10'
+          : 'border-[#E8EDF2] bg-white hover:border-teal/40 hover:bg-teal/5',
       ].join(' ')}
     >
-      <div className="flex items-center gap-3">
-        <div
-          className={[
-            'w-4 h-4 rounded-full border-2 flex-shrink-0 flex items-center justify-center transition-all',
-            selected ? 'border-teal bg-teal' : 'border-[#8C9BAB]',
-          ].join(' ')}
-        >
-          {selected && (
-            <div className="w-1.5 h-1.5 rounded-full bg-white" />
-          )}
-        </div>
+      <div className="flex items-center justify-between gap-3">
         <div>
           <p
             className={[
@@ -46,13 +36,18 @@ export default function RadioCard({
           >
             {label}
           </p>
-          {description && (
+          {sublabel && (
             <p className="font-body font-normal text-sm text-[#8C9BAB] mt-0.5">
-              {description}
+              {sublabel}
             </p>
           )}
         </div>
+        {selected && (
+          <div className="flex-shrink-0 w-5 h-5 rounded-full bg-teal flex items-center justify-center">
+            <span className="text-white text-xs font-bold">✓</span>
+          </div>
+        )}
       </div>
     </button>
-  );
+  )
 }

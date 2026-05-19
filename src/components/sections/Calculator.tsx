@@ -1,153 +1,192 @@
-'use client';
+'use client'
 
-import { useCalculator } from '@/hooks/useCalculator';
-import ProgressBar from '@/components/ui/ProgressBar';
-import RadioCard from '@/components/ui/RadioCard';
-import type { CalculatorFormData } from '@/types/calculator';
+import { useCallback } from 'react'
+import { useCalculator } from '@/hooks/useCalculator'
+import ProgressBar from '@/components/ui/ProgressBar'
+import RadioCard from '@/components/ui/RadioCard'
+import type { CalculatorFormData } from '@/types/calculator'
+
+type StepOption = {
+  value: string
+  label: string
+  sublabel?: string
+}
 
 type StepConfig = {
-  title: string;
-  field: keyof CalculatorFormData;
-  options: { value: string; label: string; description: string }[];
-};
+  field: keyof CalculatorFormData
+  question: string
+  microcopy: string
+  options: StepOption[]
+}
 
 const STEPS: StepConfig[] = [
   {
-    title: 'Qual é a especialidade da sua clínica?',
-    field: 'especialidade',
-    options: [
-      { value: 'ortopedia', label: 'Ortopedia / Traumatologia', description: 'Cirurgias, procedimentos e implantes ortopédicos' },
-      { value: 'cardiologia', label: 'Cardiologia / Hemodinâmica', description: 'Cateterismo, stents, exames especializados' },
-      { value: 'oncologia', label: 'Oncologia', description: 'Quimioterapia, imunoterapia, protocolos oncológicos' },
-      { value: 'clinica-geral', label: 'Clínica Geral / Medicina Interna', description: 'Consultas, exames de rotina, internações' },
-      { value: 'outra', label: 'Outra especialidade', description: 'Ginecologia, pediatria, neurologia, etc.' },
-    ],
-  },
-  {
-    title: 'Qual é o faturamento mensal com convênios?',
     field: 'faturamento',
+    question: 'Qual é o faturamento mensal da sua clínica com convênios?',
+    microcopy: 'Use uma estimativa — o cálculo ajusta automaticamente',
     options: [
-      { value: 'ate-50k', label: 'Até R$ 50.000 / mês', description: 'Clínica de menor porte' },
-      { value: '50k-150k', label: 'R$ 50.000 a R$ 150.000 / mês', description: 'Clínica de médio porte' },
-      { value: '150k-500k', label: 'R$ 150.000 a R$ 500.000 / mês', description: 'Clínica de grande porte' },
-      { value: 'acima-500k', label: 'Acima de R$ 500.000 / mês', description: 'Hospital ou grupo médico' },
+      { value: 'ate80k',    label: 'Até R$ 80.000/mês' },
+      { value: '80k-200k',  label: 'R$ 80.001 a R$ 200.000/mês' },
+      { value: '200k-500k', label: 'R$ 200.001 a R$ 500.000/mês' },
+      { value: 'acima500k', label: 'Acima de R$ 500.000/mês' },
     ],
   },
   {
-    title: 'Qual é o seu principal convênio?',
-    field: 'convenio',
+    field: 'especialidade',
+    question: 'Qual é a sua principal especialidade médica?',
+    microcopy: 'Especialidades cirúrgicas têm as maiores taxas de glosa',
     options: [
-      { value: 'unimed', label: 'Unimed', description: 'Qualquer cooperativa Unimed' },
-      { value: 'amil', label: 'Amil / Medial / UnitedHealth', description: 'Grupo UnitedHealth no Brasil' },
-      { value: 'bradesco-sulamerica', label: 'Bradesco Saúde / SulAmérica', description: 'Grupos Bradesco e SulAmérica' },
-      { value: 'multiplos', label: 'Múltiplos convênios / Outro', description: 'Carteira diversificada ou outro operador' },
+      { value: 'ortopedia',   label: 'Ortopedia / Traumatologia' },
+      { value: 'cirurgia',    label: 'Cirurgia Geral / Centro Cirúrgico' },
+      { value: 'cardiologia', label: 'Cardiologia' },
+      { value: 'oncologia',   label: 'Oncologia' },
+      { value: 'oftalmologia',label: 'Oftalmologia' },
+      { value: 'outra',       label: 'Outra especialidade' },
     ],
   },
   {
-    title: 'Como você controla suas glosas hoje?',
-    field: 'controle',
+    field: 'operadora',
+    question: 'Qual é o principal convênio da sua clínica?',
+    microcopy: 'Algumas operadoras têm taxas de glosa até 3× maiores que a média',
     options: [
-      { value: 'nenhum', label: 'Não controlo / Não tenho processo', description: 'Sem acompanhamento sistemático' },
-      { value: 'manual-esporadico', label: 'Revisão manual esporádica', description: 'Quando há tempo disponível' },
-      { value: 'sistema-processo', label: 'Tenho sistema ou processo definido', description: 'Acompanhamento regular' },
-      { value: 'equipe-dedicada', label: 'Equipe dedicada ao faturamento', description: 'Profissionais exclusivos para glosas' },
+      { value: 'hapvida',    label: 'Hapvida / NotreDame' },
+      { value: 'unimed',     label: 'Unimed' },
+      { value: 'amil',       label: 'Amil' },
+      { value: 'sulamerica', label: 'SulAmérica / Bradesco' },
+      { value: 'outra',      label: 'Outra operadora' },
     ],
   },
-];
+  {
+    field: 'ultimaAuditoria',
+    question: 'Há quanto tempo não realiza uma auditoria formal de glosas?',
+    microcopy: 'Esse dado é determinante — quanto mais tempo, maior a perda acumulada',
+    options: [
+      { value: 'nunca',      label: 'Nunca realizei uma auditoria',  sublabel: 'Situação de risco máximo' },
+      { value: 'mais1ano',   label: 'Há mais de 1 ano',              sublabel: 'Glosas acumuladas sem recurso' },
+      { value: 'entre6e12',  label: 'Entre 6 e 12 meses',            sublabel: 'Auditoria desatualizada' },
+      { value: 'regular',    label: 'Realizo regularmente',           sublabel: 'Boa prática — mas perdas ainda ocorrem' },
+    ],
+  },
+]
+
+function LoadingState() {
+  return (
+    <div className="text-center py-8">
+      <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-teal/10 mb-6 animate-spin">
+        <span className="text-2xl" role="img" aria-label="Calculando">🧮</span>
+      </div>
+      <h3 className="font-display font-bold text-navy text-xl mb-2">
+        Calculando suas perdas...
+      </h3>
+      <p className="font-body text-[#8C9BAB] text-sm mb-8">
+        Cruzando dados com benchmarks Anahp/ANS 2025
+      </p>
+      <div className="max-w-xs mx-auto h-1.5 bg-[#E8EDF2] rounded-full overflow-hidden">
+        <div className="animate-loading-bar h-full bg-teal rounded-full" />
+      </div>
+    </div>
+  )
+}
 
 export default function Calculator() {
-  const { step, totalSteps, form, isComplete, canAdvance, setField, next, back } =
-    useCalculator();
+  const { state, updateField, nextStep, prevStep, executarCalculo, canAdvance } =
+    useCalculator()
 
-  const currentStep = STEPS[step - 1];
-  const isLastStep = step === totalSteps;
-  const currentValue = form[currentStep.field];
+  const { currentStep, formData, isCalculating, showBridge } = state
 
-  if (isComplete) {
-    return (
-      <section id="calculadora" className="bg-[#F4F7FA] py-16 md:py-20 px-5 md:px-8">
-        <div className="max-w-2xl mx-auto text-center">
-          <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-teal/10 mb-6">
-            <span className="text-teal text-3xl">✓</span>
-          </div>
-          <h2 className="font-display font-bold text-navy text-2xl md:text-3xl mb-3">
-            Calculando suas perdas...
-          </h2>
-          <p className="font-body text-[#8C9BAB] text-base">
-            Seu diagnóstico está sendo preparado logo abaixo.
-          </p>
-        </div>
-      </section>
-    );
-  }
+  const handleNext = useCallback(() => {
+    if (currentStep < 4) {
+      nextStep()
+    } else {
+      executarCalculo()
+    }
+  }, [currentStep, nextStep, executarCalculo])
+
+  // Bridge section placeholder — implementada na Etapa 4
+  if (showBridge) return null
+
+  const step = STEPS[currentStep - 1]
+  const currentValue = formData[step.field]
+  const isLastStep = currentStep === 4
+  const enabled = canAdvance()
 
   return (
-    <section id="calculadora" className="bg-[#F4F7FA] py-16 md:py-20 px-5 md:px-8">
+    <section id="calculadora" className="bg-white py-20 md:py-24 px-5 md:px-8">
       <div className="max-w-2xl mx-auto">
         <div className="text-center mb-10">
           <h2 className="font-display font-bold text-navy text-2xl md:text-3xl mb-3">
-            Calcule Suas Perdas Agora
+            Responda 4 perguntas. Calculamos sua perda real.
           </h2>
           <p className="font-body text-[#8C9BAB] text-base">
-            4 perguntas · Resultado imediato · Gratuito
+            Diagnóstico gratuito baseado em dados oficiais ANS/Anahp 2025
           </p>
         </div>
 
         <div className="bg-white rounded-2xl border border-[#E8EDF2] shadow-[0_4px_24px_rgba(10,37,64,0.08)] p-6 md:p-8">
-          <div className="mb-8">
-            <ProgressBar current={step} total={totalSteps} />
-          </div>
+          {isCalculating ? (
+            <LoadingState />
+          ) : (
+            <>
+              <div className="mb-8">
+                <ProgressBar currentStep={currentStep} totalSteps={4} />
+              </div>
 
-          <h3 className="font-display font-semibold text-navy text-lg md:text-xl mb-6">
-            {currentStep.title}
-          </h3>
+              <h3 className="font-display font-semibold text-navy text-lg md:text-xl mb-1">
+                {step.question}
+              </h3>
+              <p className="font-body text-[#8C9BAB] text-sm mb-6">
+                {step.microcopy}
+              </p>
 
-          <div
-            role="radiogroup"
-            aria-label={currentStep.title}
-            className="space-y-3 mb-8"
-          >
-            {currentStep.options.map((opt) => (
-              <RadioCard
-                key={opt.value}
-                label={opt.label}
-                description={opt.description}
-                value={opt.value}
-                selected={currentValue === opt.value}
-                onChange={(val) => setField(currentStep.field, val)}
-              />
-            ))}
-          </div>
-
-          <div className="flex items-center justify-between gap-4">
-            {step > 1 ? (
-              <button
-                type="button"
-                onClick={back}
-                className="font-body font-medium text-[#8C9BAB] hover:text-navy transition-colors text-sm px-4 py-2"
+              <div
+                role="radiogroup"
+                aria-label={step.question}
+                className="space-y-3 mb-8"
               >
-                ← Voltar
-              </button>
-            ) : (
-              <div aria-hidden="true" />
-            )}
-            <button
-              type="button"
-              onClick={next}
-              disabled={!canAdvance}
-              aria-disabled={!canAdvance}
-              className={[
-                'font-display font-semibold text-white px-6 py-3 rounded-lg transition-all duration-200 text-base',
-                canAdvance
-                  ? 'bg-teal hover:bg-teal-dark hover:scale-[1.02]'
-                  : 'bg-[#8C9BAB] cursor-not-allowed opacity-60',
-              ].join(' ')}
-            >
-              {isLastStep ? 'Calcular Minhas Perdas →' : 'Próximo →'}
-            </button>
-          </div>
+                {step.options.map((opt) => (
+                  <RadioCard
+                    key={opt.value}
+                    value={opt.value}
+                    label={opt.label}
+                    sublabel={opt.sublabel}
+                    selected={currentValue === opt.value}
+                    onChange={(val) => updateField(step.field, val)}
+                  />
+                ))}
+              </div>
+
+              <div className="flex items-center justify-between gap-4">
+                {currentStep > 1 ? (
+                  <button
+                    type="button"
+                    onClick={prevStep}
+                    className="font-body font-medium text-[#8C9BAB] hover:text-navy transition-colors text-sm px-4 py-2"
+                  >
+                    ← Voltar
+                  </button>
+                ) : (
+                  <div aria-hidden="true" />
+                )}
+
+                <button
+                  type="button"
+                  onClick={handleNext}
+                  disabled={!enabled}
+                  aria-disabled={!enabled}
+                  className={[
+                    'font-display font-semibold text-white px-6 py-3 rounded-lg transition-all duration-200 text-base',
+                    enabled
+                      ? 'bg-teal hover:bg-teal-dark hover:scale-[1.02]'
+                      : 'bg-[#8C9BAB] cursor-not-allowed opacity-50',
+                  ].join(' ')}
+                >
+                  {isLastStep ? 'Calcular Minhas Perdas →' : 'Próximo →'}
+                </button>
+              </div>
+            </>
+          )}
         </div>
       </div>
     </section>
-  );
+  )
 }

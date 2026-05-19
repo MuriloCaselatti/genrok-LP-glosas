@@ -1,39 +1,55 @@
+export type FaturamentoRange =
+  | 'ate80k'
+  | '80k-200k'
+  | '200k-500k'
+  | 'acima500k'
+
 export type Especialidade =
   | 'ortopedia'
+  | 'cirurgia'
   | 'cardiologia'
   | 'oncologia'
-  | 'clinica-geral'
-  | 'outra';
+  | 'oftalmologia'
+  | 'outra'
 
-export type FaixaFaturamento =
-  | 'ate-50k'
-  | '50k-150k'
-  | '150k-500k'
-  | 'acima-500k';
-
-export type Convenio =
+export type Operadora =
   | 'unimed'
+  | 'hapvida'
   | 'amil'
-  | 'bradesco-sulamerica'
-  | 'multiplos';
+  | 'sulamerica'
+  | 'outra'
 
-export type ControleGlosas =
-  | 'nenhum'
-  | 'manual-esporadico'
-  | 'sistema-processo'
-  | 'equipe-dedicada';
+export type UltimaAuditoria =
+  | 'nunca'
+  | 'mais1ano'
+  | 'entre6e12'
+  | 'regular'
 
 export interface CalculatorFormData {
-  especialidade: Especialidade | null;
-  faturamento: FaixaFaturamento | null;
-  convenio: Convenio | null;
-  controle: ControleGlosas | null;
+  faturamento: FaturamentoRange | null
+  especialidade: Especialidade | null
+  operadora: Operadora | null
+  ultimaAuditoria: UltimaAuditoria | null
 }
 
-export interface CalculatorResult {
-  faturamentoEstimado: number;
-  taxaGlosaPercent: number;
-  perdaMensalEstimada: number;
-  perdaAnualEstimada: number;
-  valorRecuperavel: number;
+export interface CalculationResult {
+  perdaMensalBruta: number
+  recuperavelMensal: number
+  recuperavelAnual: number
+  recuperavel3Anos: number
+  recuperavel5Anos: number
+  choqueFiscal: number
+  taxaGlosaAplicada: number
+  faixaFaturamento: string
+  especialidadeLabel: string
+  operadoraLabel: string
+  ultimaAuditoriaLabel: string
+}
+
+export interface CalculatorState {
+  currentStep: number
+  formData: CalculatorFormData
+  isCalculating: boolean
+  result: CalculationResult | null
+  showBridge: boolean
 }

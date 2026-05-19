@@ -1,62 +1,80 @@
-'use client';
+'use client'
 
-import { useState } from 'react';
-import type { CalculatorFormData, CalculatorResult } from '@/types/calculator';
-import { calcularPerdas } from '@/lib/calculator';
+import { useState, useCallback } from 'react'
+import type { CalculatorState, CalculatorFormData } from '@/types/calculator'
+import { calcularPerdas } from '@/lib/calculator'
 
-const FIELD_BY_STEP: Record<number, keyof CalculatorFormData> = {
-  1: 'especialidade',
-  2: 'faturamento',
-  3: 'convenio',
-  4: 'controle',
-};
-
-const initialForm: CalculatorFormData = {
-  especialidade: null,
-  faturamento: null,
-  convenio: null,
-  controle: null,
-};
+const INITIAL_STATE: CalculatorState = {
+  currentStep: 1,
+  formData: {
+    faturamento: null,
+    especialidade: null,
+    operadora: null,
+    ultimaAuditoria: null,
+  },
+  isCalculating: false,
+  result: null,
+  showBridge: false,
+}
 
 export function useCalculator() {
-  const [step, setStep] = useState(1);
-  const [form, setForm] = useState<CalculatorFormData>(initialForm);
-  const [result, setResult] = useState<CalculatorResult | null>(null);
-  const [isComplete, setIsComplete] = useState(false);
+  const [state, setState] = useState<CalculatorState>(INITIAL_STATE)
 
-  const totalSteps = 4;
-  const currentField = FIELD_BY_STEP[step];
-  const canAdvance = form[currentField] !== null;
+  const updateField = useCallback((field: keyof CalculatorFormData, value: string) => {
+    setState(prev => ({
+      ...prev,
+      formData: { ...prev.formData, [field]: value },
+    }))
+  }, [])
 
-  function setField(key: keyof CalculatorFormData, value: string) {
-    setForm((prev) => ({ ...prev, [key]: value }));
-  }
+  const nextStep = useCallback(() => {
+    setState(prev => ({
+      ...prev,
+      currentStep: Math.min(prev.currentStep + 1, 4),
+    }))
+  }, [])
 
-  function next() {
-    if (step < totalSteps) {
-      setStep((s) => s + 1);
-    } else {
-      const calc = calcularPerdas(form);
-      setResult(calc);
-      setIsComplete(true);
-      // Bridge section reads `result` in Etapa 4
-      document.getElementById('resultado')?.scrollIntoView({ behavior: 'smooth' });
+  const prevStep = useCallback(() => {
+    setState(prev => ({
+      ...prev,
+      currentStep: Math.max(prev.currentStep - 1, 1),
+    }))
+  }, [])
+
+  // Loading de 3s — cria antecipação emocional intencional
+  const executarCalculo = useCallback(async () => {
+    setState(prev => ({ ...prev, isCalculating: true }))
+
+    await new Promise<void>(resolve => setTimeout(resolve, 3000))
+
+    setState(prev => {
+      const result = calcularPerdas(prev.formData)
+      return {
+        ...prev,
+        isCalculating: false,
+        result,
+        showBridge: true,
+      }
+    })
+  }, [])
+
+  const canAdvance = useCallback((): boolean => {
+    const { formData, currentStep } = state
+    switch (currentStep) {
+      case 1: return formData.faturamento !== null
+      case 2: return formData.especialidade !== null
+      case 3: return formData.operadora !== null
+      case 4: return formData.ultimaAuditoria !== null
+      default: return false
     }
-  }
-
-  function back() {
-    if (step > 1) setStep((s) => s - 1);
-  }
+  }, [state])
 
   return {
-    step,
-    totalSteps,
-    form,
-    result,
-    isComplete,
+    state,
+    updateField,
+    nextStep,
+    prevStep,
+    executarCalculo,
     canAdvance,
-    setField,
-    next,
-    back,
-  };
+  }
 }
