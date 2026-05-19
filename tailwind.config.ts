@@ -9,8 +9,14 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        background: "var(--background)",
-        foreground: "var(--foreground)",
+        navy: { DEFAULT: '#0A2540', light: '#0D3461' },
+        teal: { DEFAULT: '#00B896', dark: '#009478' },
+        danger: '#E53E3E',
+        warning: '#F6AD55',
+      },
+      fontFamily: {
+        display: ['var(--font-sora)', 'Sora', 'sans-serif'],
+        body: ['var(--font-dm-sans)', 'DM Sans', 'sans-serif'],
       },
     },
   },
